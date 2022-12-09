@@ -24,7 +24,7 @@ public class EsEmbeddedServerIntTest {
 
     @BeforeClass
     public static void setUp() {
-        server = new EsEmbeddedServer("datashare", esDir.getRoot().getPath(), esDir.getRoot().getPath(), "9200");
+        server = new EsEmbeddedServer("datashare", esDir.getRoot().getPath(), esDir.getRoot().getPath(), "9201");
         server.start();
     }
 

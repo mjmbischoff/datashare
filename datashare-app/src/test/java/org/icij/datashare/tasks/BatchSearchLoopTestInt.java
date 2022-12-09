@@ -5,34 +5,23 @@ import org.icij.datashare.PropertiesProvider;
 import org.icij.datashare.batch.BatchSearch;
 import org.icij.datashare.batch.BatchSearchRepository;
 import org.icij.datashare.batch.SearchException;
-import org.icij.datashare.tasks.BatchSearchLoop;
-import org.icij.datashare.tasks.BatchSearchRunner;
-import org.icij.datashare.tasks.TaskFactory;
-import org.icij.datashare.text.Document;
-import org.icij.datashare.text.Project;
 import org.icij.datashare.text.indexing.Indexer;
 import org.icij.datashare.time.DatashareTime;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
-import sun.misc.Signal;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.fest.assertions.Assertions.assertThat;
-import static org.icij.datashare.CollectionUtils.asSet;
-import static org.icij.datashare.text.DocumentBuilder.createDoc;
-import static org.icij.datashare.text.Project.*;
 import static org.icij.datashare.text.Project.project;
 import static org.icij.datashare.user.User.local;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 
 public class BatchSearchLoopTestInt {
@@ -73,10 +62,9 @@ public class BatchSearchLoopTestInt {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         BatchSearchLoop app = new BatchSearchLoop(repository, batchSearchQueue, factory, countDownLatch);
 
-        executor.submit(app::run);
+        Future future = executor.submit(app::run);
         countDownLatch.await();
-        Signal term = new Signal("TERM");
-        Signal.raise(term);
+        future.cancel(true);
         executor.shutdown();
 
         assertThat(executor.awaitTermination(1,TimeUnit.SECONDS)).isTrue();
@@ -94,8 +82,7 @@ public class BatchSearchLoopTestInt {
 
         executor.submit(app::run);
         countDownLatch.await();
-        Signal term = new Signal("TERM");
-        Signal.raise(term);
+        app.stop();
         executor.shutdown();
 
         assertThat(executor.awaitTermination(1,TimeUnit.SECONDS)).isTrue();
@@ -131,8 +118,7 @@ public class BatchSearchLoopTestInt {
 
         executor.submit(app::run);
         waitQueueToHaveSize(1);
-        Signal term = new Signal("TERM");
-        Signal.raise(term);
+        app.stop();
         executor.shutdown();
         assertThat(executor.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
 
@@ -149,8 +135,7 @@ public class BatchSearchLoopTestInt {
         executor.submit(app::run);
         waitQueueToBeEmpty();
 
-        Signal term = new Signal("TERM");
-        Signal.raise(term);
+        app.stop();
         executor.shutdown();
 
         assertThat(executor.awaitTermination(2,TimeUnit.SECONDS)).isTrue();
@@ -160,7 +145,7 @@ public class BatchSearchLoopTestInt {
 
     @Before
     public void setUp() {
-        initMocks(this);
+        openMocks(this);
         when(repository.get(anyString())).thenReturn(batchSearch);
         when(factory.createBatchSearchRunner(any(), any())).thenReturn(batchSearchRunner);
         batchSearchQueue = new LinkedBlockingQueue<>();
@@ -203,10 +188,14 @@ public class BatchSearchLoopTestInt {
             callThread = Thread.currentThread();
             while(!cancelAsked) {
                 try {
-                    Thread.sleep(sleepingMilliseconds); // Make sure that we wait this before mocktime.sleep()
+                    Thread.sleep(sleepingMilliseconds);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                try {
                     DatashareTime.getInstance().sleep(sleepingMilliseconds);
                 } catch (InterruptedException e) {
-                    // nothing we throw a cancel later
+                    Thread.currentThread().interrupt();
                 }
             }
             throw new BatchSearchRunner.CancelException();

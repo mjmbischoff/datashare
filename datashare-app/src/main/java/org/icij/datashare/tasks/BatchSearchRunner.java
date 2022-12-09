@@ -133,15 +133,10 @@ public class BatchSearchRunner implements Callable<Integer>, Monitorable, UserTa
 
     /**
      * cancel current batch search.
-     * this method is blocking until batchsearch has exited
      */
     public void cancel() {
         cancelAsked = true;
-        try {
-            if (callThread != null) callThread.join();
-        } catch (InterruptedException e) {
-            logger.warn("batch search interrupted during cancel check status for {}", batchSearch.uuid);
-        }
+        if(callThread!=null) callThread.interrupt();
     }
     public static class CancelException extends RuntimeException { }
 }

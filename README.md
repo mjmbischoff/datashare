@@ -160,8 +160,21 @@ Info: other languages than the ones listed below are not supported. We encourage
 Requires 
 [JDK 11](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html),
 [Maven 3](http://maven.apache.org/download.cgi) and a running [PostgreSQL](https://www.postgresql.org/) database (hostname `postgres`) 
-with two databases `datashare` and `test` with write access for user `test` / password `test`. You'll need also a running
-elasticsearch instance with `elasticsearch` as hostname ; and a redis server named `redis` as well.
+with two databases `datashare` and `test` with write access for user `test` / password `test`. 
+```shell
+docker run --name postgres -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -d postgres
+```
+You'll need also a running
+elasticsearch instance with `elasticsearch` as hostname ;
+```shell
+docker network create datashare
+docker run --name elasticsearch --net datashare -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" -e ES_JAVA_OPTS="-Xms1g -Xmx1g" docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+docker run --name kibana --net datashare -p 127.0.0.1:5601:5601 -e "ELASTICSEARCH_HOSTS=http://elasticsearch:9200" docker.elastic.co/kibana/kibana:7.17.8
+```
+and a redis server named `redis` as well.
+```shell
+docker run --name redis -d redis:7-alpine
+```
 
 ```
 mvn validate

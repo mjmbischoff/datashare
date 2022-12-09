@@ -1,11 +1,9 @@
 package org.icij.datashare.cli;
 
 import joptsimple.OptionException;
-import joptsimple.OptionSet;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.MapAssert.entry;

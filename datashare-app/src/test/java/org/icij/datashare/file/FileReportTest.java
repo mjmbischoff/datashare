@@ -3,6 +3,7 @@ package org.icij.datashare.file;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
+import javax.annotation.MatchesPattern;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,12 +17,12 @@ import static org.icij.datashare.file.AbstractFileReport.Type.DIRECTORY;
 public class FileReportTest {
     @Test
     public void test_report_for_file() throws IOException {
-        assertThat(new FileReport(getFile("email.eml")).getProt()).isEqualTo("-rw-r--r--");
+        assertThat(new FileReport(getFile("email.eml")).getProt()).isIn("-rw-r--r--","-rw-rw-r--");
     }
 
     @Test
     public void test_report_for_directory() throws IOException {
-        assertThat(new DirectoryReport(getFile("docs")).getProt()).isEqualTo("drwxr-xr-x");
+        assertThat(new DirectoryReport(getFile("docs")).getProt()).isIn("drwxr-xr-x","drwxrwxr-x");
     }
 
     @Test
@@ -65,7 +66,7 @@ public class FileReportTest {
         Files.walkFileTree(docs.toPath(), new FileReportVisitor(rootReport, 2));
         assertThat(rootReport.getContents()).hasSize(3);
         assertThat(rootReport.getContents().get(1).file.getName()).isEqualTo("embedded_doc.eml");
-        assertThat(rootReport.getContents().get(1).fileProt()).isEqualTo("rw-r--r--");
+        assertThat(rootReport.getContents().get(1).fileProt()).isIn("rw-r--r--","rw-rw-r--");
 
         assertThat(rootReport.getContents().get(2).file.getName()).isEqualTo("foo");
         assertThat(((DirectoryReport)rootReport.getContents().get(2)).getContents()).hasSize(1);

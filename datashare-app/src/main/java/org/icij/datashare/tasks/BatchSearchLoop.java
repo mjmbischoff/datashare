@@ -8,7 +8,6 @@ import org.icij.datashare.batch.SearchException;
 import org.icij.datashare.db.JooqBatchSearchRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.Signal;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -41,11 +40,13 @@ public class BatchSearchLoop {
         this.batchSearchQueue = batchSearchQueue;
         this.factory = factory;
         this.waitForMainLoopCalled = countDownLatch;
-        Signal.handle(new Signal("TERM"), signal -> {
-            exitAsked = true;
-            ofNullable(currentBatchSearchRunner.get()).ifPresent(BatchSearchRunner::cancel);
-            ofNullable(loopThread).ifPresent(Thread::interrupt); // for interrupting poll
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
+    }
+
+    public void stop() {
+        exitAsked = true;
+        ofNullable(loopThread).ifPresent(Thread::interrupt);
+        ofNullable(currentBatchSearchRunner.get()).ifPresent(BatchSearchRunner::cancel);
     }
 
     public void run() {
@@ -79,6 +80,8 @@ public class BatchSearchLoop {
                 repository.setState(currentBatchId, sex);
             } catch (InterruptedException e) {
                 logger.warn("main loop interrupted");
+                Thread.currentThread().interrupt();
+                break;
             }
         }
         logger.info("exiting main loop");

@@ -34,7 +34,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.MapAssert.entry;
 import static org.icij.datashare.session.DatashareUser.local;
 import static org.icij.datashare.text.Project.project;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class TaskResourceTest extends AbstractProdWebServerTest {

@@ -33,10 +33,11 @@ import static org.icij.datashare.com.Message.Type.INIT_MONITORING;
 import static org.icij.datashare.text.DocumentBuilder.createDoc;
 import static org.icij.datashare.text.nlp.Pipeline.Type.OPENNLP;
 import static org.icij.datashare.user.User.local;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(Parameterized.class)
 public class NlpAppTest {
@@ -139,7 +140,7 @@ public class NlpAppTest {
 
     @Before
     public void setUp() throws Exception {
-        initMocks(this);
+        openMocks(this);
         when(indexer.get(anyString(), anyString(), anyString())).thenReturn(createDoc("name").build());
         when(pipeline.getType()).thenReturn(OPENNLP);
         when(pipeline.initialize(any(Language.class))).thenReturn(true);

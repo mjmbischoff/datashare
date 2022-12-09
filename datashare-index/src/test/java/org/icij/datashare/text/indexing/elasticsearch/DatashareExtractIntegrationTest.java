@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import static java.nio.file.Paths.get;
 import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy.IMMEDIATE;
@@ -73,7 +74,9 @@ public class DatashareExtractIntegrationTest {
         assertThat(doc.getId()).isNotEqualTo(doc.getRootDocument());
         assertThat(doc.getRootDocument()).isEqualTo(tikaDocument.getId());
         assertThat(doc.getCreationDate()).isNotNull();
-        assertThat(new SimpleDateFormat("HH:mm:ss").format(doc.getCreationDate())).isEqualTo("23:22:36");
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        assertThat(formatter.format(doc.getCreationDate())).isEqualTo("23:22:36");
     }
 
     Extractor createExtractor() {

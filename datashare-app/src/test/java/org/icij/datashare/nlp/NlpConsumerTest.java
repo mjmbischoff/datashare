@@ -4,23 +4,17 @@ import org.icij.datashare.text.Document;
 import org.icij.datashare.text.Language;
 import org.icij.datashare.text.indexing.Indexer;
 import org.icij.datashare.text.nlp.AbstractPipeline;
-import org.icij.datashare.user.DatashareApiKey;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
-import java.util.List;
-
 import static java.util.Collections.emptyList;
-import static org.fest.assertions.Assertions.assertThat;
 import static org.icij.datashare.text.DocumentBuilder.createDoc;
 import static org.icij.datashare.text.Language.ENGLISH;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class NlpConsumerTest {
     @Mock private Indexer indexer;
@@ -29,7 +23,7 @@ public class NlpConsumerTest {
 
     @Before
     public void setUp() {
-        initMocks(this);
+        openMocks(this);
         nlpListener = new NlpConsumer(pipeline, indexer, 32);
     }
 
